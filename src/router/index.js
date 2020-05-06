@@ -17,7 +17,7 @@ const router = new Router({
             alias: "/home" // 路由别名，访问 "/" url会保持 "/" 但是路由匹配为 "/home"
         },
         {
-            path: "/home/:id?",
+            path: "/home/:id(\\d+)",
             name: "BlogHome",
             component: () => import("components/page/BlogHome")
         },
@@ -43,7 +43,7 @@ const router = new Router({
             component: () => import("components/page/MyPost")
         },
         {
-            path: "/message/:id?",
+            path: "/message/:id(\\d+)",
             name: "BlogMessage",
             component: () => import("components/page/BlogMessage")
         },

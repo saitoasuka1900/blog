@@ -34,13 +34,11 @@
 </template>
 
 <script>
-import router from '@/router/index'
 import BlogLogin from '../manage/BlogLogin'
 import SvgIcon from 'components/tools/SvgIcon'
 
 export default {
     name: 'BlogHeader',
-    router,
     components: { BlogLogin, SvgIcon },
     data() {
         return {

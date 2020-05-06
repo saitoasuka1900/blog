@@ -1,77 +1,133 @@
 <template>
     <div id="message" class="flex-set">
+        <div style="width: 100%">
+            <div style="margin: 10px 0;"></div>
+            <el-input
+                style="width: 95%; margin-left: 2.5%;"
+                type="textarea"
+                placeholder="请开始你的表演"
+                :autosize="{ minRows: 2, maxRows: 6 }"
+                v-model="textarea"
+                maxlength="140"
+                show-word-limit
+            ></el-input>
+            <div style="margin: 5px 0;"></div>
+            <el-button
+                size="small"
+                round
+                type="primary"
+                icon="el-icon-s-promotion"
+                style="float: right; margin-right: 2.5%;"
+                @click="addMessage()"
+            >
+                发送
+            </el-button>
+        </div>
         <div class="flex-set message-box" v-for="(elem, id) in message_list" :key="id">
             <div class="user-avatar">
-                <Avatar :src="elem.avatar" :size="40"/>
+                <Avatar :src="elem.avatar" :size="40" />
             </div>
             <div class="message-info">
-                <span style="color: green">{{elem.nickname}}</span>&nbsp;发表于&nbsp;{{elem.time}}
-                <p class="content">{{elem.content}}</p>
+                <span style="color: green">{{ elem.nickname }}</span>
+                &nbsp;发表于&nbsp;{{ elem.time }}
+                <p class="content">{{ elem.content }}</p>
             </div>
         </div>
-        <pager page-type="message" :page-size="15" @page-turn="pageTurn(arguments)"/>
+        <el-pagination
+            @current-change="pageTurn"
+            current-page.sync="1"
+            :page-size="pageSize"
+            layout="prev, pager, next"
+            :total="messageToT"
+            hideOnSinglePage
+        ></el-pagination>
+        <div style="margin: 10px 0;"></div>
     </div>
 </template>
 
 <script>
-import pager from "../tools/Pager"
-import Avatar from "vue-avatar"
-
-function Message(message) {
-    this.nickname = message.nickname
-    this.content = message.content
-    this.time = message.time
-    this.avatar = require('@/assets/' + (message.avatar === '' ? 'default_avatar.jpg' : message.avatar))
-}
+import Avatar from 'vue-avatar'
 
 export default {
-    name: "BlogMessage",
-    components: { pager, Avatar },
+    name: 'BlogMessage',
+    components: { Avatar },
     data() {
         return {
-            lastPage: 0,
             message_list: [],
+            textarea: '',
+            pageSize: 15,
+            pageId: 1,
+            messageToT: 100
         }
     },
     methods: {
-        pageTurn(vals) {
-            if (this.lastPage == vals[0]) {
-                return
-            }
-            else {
-                this.lastPage = vals[0]
-            }
+        pageTurn(val) {
+            let path = '/message/' + val.toString()
+            this.$router.push({ path: path })
+        },
+        getMessage() {
             this.$axios
-                .message('/getMessage', {
-                    pageId: vals[0],
-                    pageSize: vals[1]
+                .message('/message/get', {
+                    pageId: this.pageId,
+                    pageSize: this.pageSize
                 })
-                .then(successRespone => {
-                    this.responseResult = JSON.stringify(successRespone.data)
+                .then((successRespone) => {
+                    let responseResult = successRespone.data
                     this.message_list.length = 0
-                    for (let elem of successRespone.data.messages) {
-                        this.message_list.push(new Message(elem))
+                    for (let elem of responseResult.data.messages) {
+                        this.message_list.push({
+                            nickname: elem.nickname,
+                            content: elem.content,
+                            time: elem.time,
+                            avatar: elem.avatar === '' ? require('@/assets/default_avatar.jpg') : elem.avatar
+                        })
                     }
                 })
-                .catch(failRespone => {
-                    console.log("get message failed")
+                .catch((failRespone) => {
+                    this.$message.error('删除失败')
+                    console.log(failRespone)
                     return failRespone
                 })
         },
+        addMessage() {
+            this.$axios
+                .message('/operator/message/get', {
+                    pageId: this.pageId,
+                    pageSize: this.pageSize,
+                    content: this.textarea,
+                    rnd: this.$store.state.rnd
+                })
+                .then((successRespone) => {
+                    let responseResult = successRespone.data
+                    this.message_list.length = 0
+                    for (let elem of responseResult.data.messages) {
+                        this.message_list.push({
+                            nickname: elem.nickname,
+                            content: elem.content,
+                            time: elem.time,
+                            avatar: elem.avatar === '' ? require('@/assets/default_avatar.jpg') : elem.avatar
+                        })
+                    }
+                    if (responseResult.data.rnd !== '')
+                        this.$store.commit('setRnd', responseResult.data.rnd)
+                })
+                .catch((failRespone) => {
+                    this.$message.error('删除失败')
+                    console.log(failRespone)
+                    return failRespone
+                })
+        }
     },
     mounted: function() {
-        let cur = {avatar: '',nickname: "fijae", content:"粉啊佛尔啊佛i而iu合肥哦阿尔佛二分i哦哈尔偶分和奥i费奥弗额非我分无法而我发", time:"2012-09-23 12:23:12"}
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
-        this.message_list.push(new Message(cur))
+        this.pageId = Number(this.$route.params.id)
+        this.getMessage()
     },
+    watch: {
+        $route(to) {
+            this.pageId = Number(to.params.id)
+            this.geMessage()
+        }
+    }
 }
 </script>
 

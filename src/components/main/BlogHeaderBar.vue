@@ -32,12 +32,10 @@
 </template>
 
 <script>
-import router from '@/router/index'
 import BlogLogin from '../manage/BlogLogin'
 
 export default {
     name: 'BlogHeaderBar',
-    router,
     components: { BlogLogin },
     data() {
         return {

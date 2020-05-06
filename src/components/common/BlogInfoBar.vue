@@ -21,7 +21,6 @@
 
 <script>
 import Avatar from "vue-avatar"
-import router from "@/router/index"
 
 function Comment(comment) {
     this.nickname = comment.nickname
@@ -34,7 +33,6 @@ function Comment(comment) {
 
 export default {
     name: "BlogInfoBar",
-    router,
     components: { Avatar },
     data() {
         return {
