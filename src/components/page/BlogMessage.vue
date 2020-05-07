@@ -35,7 +35,7 @@
         </div>
         <el-pagination
             @current-change="pageTurn"
-            current-page.sync="1"
+            :current-page.sync="pageId"
             :page-size="pageSize"
             layout="prev, pager, next"
             :total="messageToT"
@@ -55,9 +55,9 @@ export default {
         return {
             message_list: [],
             textarea: '',
-            pageSize: 15,
-            pageId: 1,
-            messageToT: 100
+            pageSize: 10,
+            pageId: Number(this.$route.params.id),
+            messageToT: 0
         }
     },
     methods: {
@@ -67,31 +67,42 @@ export default {
         },
         getMessage() {
             this.$axios
-                .message('/message/get', {
+                .post('/message/get', {
                     pageId: this.pageId,
                     pageSize: this.pageSize
                 })
                 .then((successRespone) => {
                     let responseResult = successRespone.data
-                    this.message_list.length = 0
-                    for (let elem of responseResult.data.messages) {
-                        this.message_list.push({
-                            nickname: elem.nickname,
-                            content: elem.content,
-                            time: elem.time,
-                            avatar: elem.avatar === '' ? require('@/assets/default_avatar.jpg') : elem.avatar
-                        })
+                    if (responseResult.code === 404) {
+                        this.$message.error(responseResult.message)
+                        return
                     }
+                    if (responseResult.code === 200) {
+                        this.messageToT = responseResult.data.messageToT
+                        this.message_list.length = 0
+                        for (let elem of responseResult.data.message_infos) {
+                            this.message_list.push({
+                                nickname: elem.nickname,
+                                content: elem.content,
+                                time: elem.time,
+                                avatar: elem.avatar === '' ? require('@/assets/default_avatar.jpg') : elem.avatar
+                            })
+                        }
+                        this.$message({
+                            message: '获取成功',
+                            type: 'success'
+                        })
+                    } else this.$message.error('获取失败')
                 })
                 .catch((failRespone) => {
-                    this.$message.error('删除失败')
+                    this.$message.error('获取失败')
                     console.log(failRespone)
                     return failRespone
                 })
         },
         addMessage() {
             this.$axios
-                .message('/operator/message/get', {
+                .post('/operator/message/add', {
                     pageId: this.pageId,
                     pageSize: this.pageSize,
                     content: this.textarea,
@@ -99,33 +110,47 @@ export default {
                 })
                 .then((successRespone) => {
                     let responseResult = successRespone.data
-                    this.message_list.length = 0
-                    for (let elem of responseResult.data.messages) {
-                        this.message_list.push({
-                            nickname: elem.nickname,
-                            content: elem.content,
-                            time: elem.time,
-                            avatar: elem.avatar === '' ? require('@/assets/default_avatar.jpg') : elem.avatar
-                        })
+                    if (responseResult.code === 404) {
+                        this.$message.error(responseResult.message)
+                        return
                     }
-                    if (responseResult.data.rnd !== '')
+                    if (responseResult.code === 401) {
+                        this.$message.error(responseResult.message)
+                        this.$store.commit('Logout')
+                        return
+                    }
+                    if (responseResult.code === 200) {
+                        this.messageToT = responseResult.data.messageToT
+                        this.message_list.length = 0
+                        for (let elem of responseResult.data.message_infos) {
+                            this.message_list.push({
+                                nickname: elem.nickname,
+                                content: elem.content,
+                                time: elem.time,
+                                avatar: elem.avatar === '' ? require('@/assets/default_avatar.jpg') : elem.avatar
+                            })
+                        }
                         this.$store.commit('setRnd', responseResult.data.rnd)
+                        this.$message({
+                            message: '留言成功',
+                            type: 'success'
+                        })
+                    } else this.$message.error('留言失败')
                 })
                 .catch((failRespone) => {
-                    this.$message.error('删除失败')
+                    this.$message.error('留言失败')
                     console.log(failRespone)
                     return failRespone
                 })
         }
     },
     mounted: function() {
-        this.pageId = Number(this.$route.params.id)
         this.getMessage()
     },
     watch: {
         $route(to) {
             this.pageId = Number(to.params.id)
-            this.geMessage()
+            this.getMessage()
         }
     }
 }
@@ -137,6 +162,7 @@ export default {
     flex-direction: column;
     align-items: center;
     background-color: rgba(255, 255, 255, 0.8);
+    width: 100%;
 }
 .message-box {
     position: relative;
@@ -148,10 +174,10 @@ export default {
     flex-direction: row;
 }
 .user-avatar {
-    display: inline-block;
     margin: 0;
 }
 .message-info {
+    flex-grow:1;
     margin-left: 1vw;
     padding: 1vw;
     background-color: rgba(233, 248, 248, 0.849);
