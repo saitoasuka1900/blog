@@ -1,24 +1,5 @@
 <template>
     <div :style="{backgroundImage: 'url(\'' + require('assets/header-bg.jpg') + '\')'}" id="header-bar" ref="header">
-        <div id="navigation" class="w3-bar">
-            <span name="navi" class="w3-bar-item w3-button" @click="$router.push({ path: '/home/1' })">主页</span>
-            <span name="navi" class="w3-bar-item w3-button" @click="$router.push({ path: '/catagory' })">分类</span>
-            <span name="navi" class="w3-bar-item w3-button" @click="$router.push({ path: '/diary/1' })">日记</span>
-            <span name="navi" class="w3-bar-item w3-button" @click="$router.push({ path: '/message/1' })">留言</span>
-            <BlogLogin />
-            <span id="search-box" class="flex-set">
-                <select class="w3-select" v-model="type">
-                    <option value="title">标题</option>
-                    <option value="class">类别</option>
-                    <option value="label">标签</option>
-                </select>
-                <input ref="keyword" type="text" placeholder="请输入你想要搜索的关键词" class="w3-input"
-                @keydown.enter="search()">
-                <span class="search-button" @click="search()">
-                    <SvgIcon name="search" />
-                </span>
-            </span>
-        </div>
         <div id="header-left" :style="{backgroundImage: 'url(\'' + require('assets/header-bg.jpg') + '\')'}" />
         <span id="title">Asuka's blog</span>
         <div id="header-right" :style="{backgroundImage: 'url(\'' + require('assets/header-bg.jpg') + '\')'}" />
@@ -34,15 +15,11 @@
 </template>
 
 <script>
-import BlogLogin from '../manage/BlogLogin'
-import SvgIcon from 'components/tools/SvgIcon'
 
 export default {
     name: 'BlogHeader',
-    components: { BlogLogin, SvgIcon },
     data() {
         return {
-            type: 'title',
             quotes: [
                 {
                     content: '',
@@ -83,13 +60,6 @@ export default {
                 })
                 .catch(err => console.error(err))
         },
-        search() {
-            if (this.$refs.keyword.value === "") {
-                alert('请输入关键词')
-                return
-            }
-            this.$router.push({ path: '/search/' + this.type + '/' + this.$refs.keyword.value + '/1'})
-        }
     },
     mounted: function() {
         this.getQuote()
@@ -108,20 +78,6 @@ export default {
     flex-shrink: 0;
     z-index: 2;
     background-size: 100% 100%;
-}
-#navigation {
-    height: 40px;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    z-index: 3;
-    background-color: rgba(0, 0, 0, 0.7);
-}
-span[name='navi'] {
-    color: white;
-    background-color: rgba(0, 0, 0, 0);
-    font-size: 1em;
 }
 #header-left {
     position: absolute;
@@ -170,43 +126,10 @@ p {
     -webkit-box-orient: vertical;
     white-space: normal;
 }
-#search-box {
-    position: relative;
-    height: 40px;
-    left: 300px;
-    top: 0;
-    align-items: center;
-}
-select {
-    position: relative;
-    width: 55px;
-    height: 30px;
-    padding: 0;
-    margin-right: 5px;
-}
-input {
-    display: inline-block;
-    width: 333px;
-    height: 30px;
-    font-size: 1em;
-    outline: medium !important;
-}
-.search-button {
-    position: relative;
-    left: 1px;
-    cursor: pointer;
-    background-color: rgb(221, 219, 219);
-}
 
 @media screen and (max-width: 810px) {
     #header-bar {
         display: none;
-    }
-}
-@media screen and (max-width: 1100px) {
-    #search-box {
-        left: 0;
-        float: right;
     }
 }
 .header-bar-enter,

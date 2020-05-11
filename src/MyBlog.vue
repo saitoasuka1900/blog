@@ -1,8 +1,8 @@
 <template>
-    <transition-group name="index" class="container">
+    <transition-group name="index" class="container" style="overflow-x: hidden;">
         <BlogBg key="blog-bg" />
+        <BlogNaviBar v-if="ok" key="navi-bar" />
         <BlogHeader v-if="ok" key="header-part" />
-        <BlogHeaderBar v-if="ok" key="header-side-bar" />
         <BlogMain v-if="ok" key="main-part" />
         <BlogFooterWave v-if="ok" key="footer-part-wave" />
         <BlogFooter v-if="ok" key="footer-part" />
@@ -13,7 +13,7 @@
 <script>
 import BlogBg from './BlogBg'
 import BlogHeader from 'components/main/BlogHeader'
-import BlogHeaderBar from 'components/main/BlogHeaderBar'
+import BlogNaviBar from 'components/main/BlogNaviBar'
 import BlogMain from 'components/main/BlogMain'
 import BlogFooter from 'components/main/BlogFooter'
 import BlogFooterWave from 'components/common/BlogFooterWave'
@@ -26,7 +26,7 @@ export default {
             ok: false
         }
     },
-    components: { BlogBg, BlogHeader, BlogHeaderBar, BlogMain, BlogFooter, BlogFooterWave, MusicPlayer },
+    components: { BlogBg, BlogHeader, BlogNaviBar, BlogMain, BlogFooter, BlogFooterWave, MusicPlayer },
     mounted: function() {
         this.ok = !this.ok
     }
