@@ -42,29 +42,32 @@
                     留言
                 </span>
                 <span
-                    v-if="this.$store.state.token === null"
+                    v-if="$store.state.token === null"
                     name="navi"
                     class="w3-bar-item w3-button"
                     @click="
-                        Visible = true
+                        reset_form()
+                        form.username = $store.state.username == null ? '' : $store.state.username
                         title = '登录'
+                        Visible = true
                     "
                 >
                     登录
                 </span>
                 <span
-                    v-if="this.$store.state.token === null"
+                    v-if="$store.state.token === null"
                     name="navi"
                     class="w3-bar-item w3-button"
                     @click="
-                        Visible = true
+                        reset_form()
                         title = '注册'
+                        Visible = true
                     "
                 >
                     注册
                 </span>
                 <el-dropdown
-                    v-if="this.$store.state.token !== null"
+                    v-if="$store.state.token !== null"
                     @command="handleCommand"
                     class="w3-bar-item w3-button"
                     style="background-color: rgba(0, 0, 0, 0);"
@@ -76,11 +79,20 @@
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item command="edit" icon="el-icon-edit">个人资料</el-dropdown-item>
                         <el-dropdown-item command="logout" icon="el-icon-switch-button">注销</el-dropdown-item>
+                        <el-dropdown-item v-if="$store.state.state === '2'" command="manage" icon="el-icon-s-tools">
+                            后台管理
+                        </el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
             </div>
         </div>
-        <el-dialog :title="title" :visible.sync="Visible" :width="ModuleSize" :close-on-click-modal="false">
+        <el-dialog
+            v-if="$store.state.token === null"
+            :title="title"
+            :visible.sync="Visible"
+            :width="ModuleSize"
+            :close-on-click-modal="false"
+        >
             <el-form :model="form" ref="user_info">
                 <el-form-item
                     label="用户名"
@@ -89,7 +101,7 @@
                     prop="username"
                 >
                     <el-input
-                        type="username"
+                        type="text"
                         placeholder="请输入用户名"
                         v-model="form.username"
                         autocomplete="off"
@@ -152,6 +164,38 @@
                 <el-button type="primary" @click="submit()">{{ title }}</el-button>
             </div>
         </el-dialog>
+        <el-dialog v-if="$store.state.token !== null" title="个人资料" :visible.sync="editVisible" :width="ModuleSize">
+            <p>
+                昵称: {{ $store.state.nickname }}
+                <el-button
+                    style="padding: 3px 0; float: right;"
+                    type="text"
+                    @click="
+                        innerTitle = '修改昵称'
+                        innerVisible = true
+                    "
+                >
+                    修改昵称
+                </el-button>
+            </p>
+            <p>
+                邮箱: {{ $store.state.email === '' ? '无' : $store.state.email }}
+                <el-button
+                    style="padding: 3px 0; float: right;"
+                    type="text"
+                    @click="
+                        innerTitle = $store.state.email === '' ? '邮箱绑定' : '邮箱解除'
+                        innerVisible = true
+                    "
+                >
+                    {{ $store.state.email === '' ? '绑定邮箱' : '解除绑定' }}
+                </el-button>
+            </p>
+            <el-dialog :width="ModuleSize" :title="innerTitle" :visible.sync="innerVisible"></el-dialog>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="editVisible = false">取 消</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -163,6 +207,7 @@ export default {
             Visible: false,
             ModuleSize: document.documentElement.clientWidth > 750 ? '450px' : '350px',
             title: '',
+            innerTitle: '',
             form: {
                 username: '',
                 nickname: '',
@@ -170,12 +215,19 @@ export default {
                 password_repeat: ''
             },
             editVisible: false,
+            innerVisible: false,
             labelWidth: '120',
             widthListen: document.documentElement.clientWidth > 809,
             naviShow: document.documentElement.clientWidth > 809
         }
     },
     methods: {
+        reset_form() {
+            this.form.username = ''
+            this.form.nickname = ''
+            this.form.password = ''
+            this.form.password_repeat = ''
+        },
         tourist_login() {
             this.$axios
                 .post('/tourist/Login')
@@ -197,16 +249,13 @@ export default {
                                 h('span', null, '密码: '),
                                 h('span', { style: 'color: teal' }, responseResult.data.password)
                             ]),
+                            h('p', null, '用户名和密码需要手动保存')
                         ]),
-                        confirmButtonText: '确定',
+                        confirmButtonText: '确定'
                     }).then(() => {
-                        this.$store.commit('Login', responseResult.data)
-                        this.$message({
-                            message: '登陆成功',
-                            type: 'success'
-                        })
-                        this.isLogin = true
-                        this.Visible = false
+                        this.form.username = responseResult.data.username
+                        this.form.password = responseResult.data.password
+                        this.submit()
                     })
                 })
                 .catch((failRespone) => {
@@ -226,6 +275,8 @@ export default {
                 this.editVisible = true
             } else if (command === 'logout') {
                 this.$store.commit('Logout')
+            } else if (command === 'manage') {
+                window.open('https://www.saitoasuka.xyz/myblog/manage', '_blank')
             }
         },
         submit() {
@@ -248,6 +299,7 @@ export default {
                         })
                         this.isLogin = true
                         this.Visible = false
+                        this.reset_form()
                     })
                     .catch((failRespone) => {
                         this.$message.error('登录失败')
@@ -273,6 +325,7 @@ export default {
                         })
                         this.isLogin = true
                         this.Visible = false
+                        this.reset_form()
                     })
                     .catch((failRespone) => {
                         this.$message.error('注册失败')

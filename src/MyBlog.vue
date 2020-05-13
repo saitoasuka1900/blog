@@ -27,7 +27,30 @@ export default {
         }
     },
     components: { BlogBg, BlogHeader, BlogNaviBar, BlogMain, BlogFooter, BlogFooterWave, MusicPlayer },
+    created: function() {
+    },
     mounted: function() {
+        if (this.$store.state.token !== null) {
+            this.$axios
+                .post('/operator/getUserInfo')
+                .then((successRespone) => {
+                    let responseResult = successRespone.data
+                    if (responseResult.code === 401) {
+                        this.$store.commit('Logout')
+                        return
+                    }
+                    if (responseResult.code === 200) {
+                        this.$store.commit('setUsername', responseResult.data.username)
+                        this.$store.commit('setNickname', responseResult.data.nickname)
+                        this.$store.commit('setEmail', responseResult.data.email)
+                        this.$store.commit('setState', responseResult.data.state)
+                    } else this.$message.error('获取信息失败')
+                })
+                .catch((failRespone) => {
+                    this.$message.error('获取信息失败')
+                    return failRespone
+                })
+        }
         this.ok = !this.ok
     }
 }
