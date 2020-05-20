@@ -1,9 +1,9 @@
 <template>
     <span class="info-page">
-        <div id="annonce" class="info-box">
+        <div id="announce" class="info-box">
             <div class="title">公告栏</div>
             <div class="line" />
-            <p>{{annoncement}}</p>
+            <p>{{announcement}}</p>
             <div class="line" />
         </div>
         <div id="comments" class="info-box">
@@ -37,7 +37,7 @@ export default {
     data() {
         return {
             cur: {avatar: '',nickname: "fijae", content:"粉啊佛尔啊佛i而iu合肥哦阿尔佛二分i哦哈尔偶分和奥i费奥弗额非我分无法而我发", time:"2012-09-23 12:23:12", belongTo: '/home/post/1'},
-            annoncement: "fqewgaegeqafeafeaefiqaewufouwhfgqewfw",
+            announcement: "",
             comments: []
         }
     },
@@ -53,25 +53,17 @@ export default {
         this.comments.push(new Comment(this.cur))
         this.comments[0].id = 5
         this.$axios
-            .post('/getAnnonce')
-            .then(successRespone => {
-                if (successRespone.data.code === 200) {
-                    let res = JSON.parse(successRespone.data)
-                    this.annoncement = res.annoncement
-                }
+            .post('/getAnnounce')
+            .then((successRespone) => {
+                let res = successRespone.data
+                if (res.code === 200)
+                    this.announcement = res.data.announcement
+                else
+                    console.log('Get Annoncement failed')
             })
-            .catch(failRespone => {
-                console.log('Get Annoncement failed')
+            .catch((failRespone) => {
+                console.log(failRespone)
                 return failRespone
-            })
-        this.$axios
-            .post('getComment')
-            .then(successRespone => {
-                if (successRespone.data.code === 200) {
-                    let res = JSON.parse(successRespone.data)
-                    this.comments.push(new Comment(res.comment))
-                    this.comments[this.comments.length - 1].id = this.comments.length
-                }
             })
     },
 }
