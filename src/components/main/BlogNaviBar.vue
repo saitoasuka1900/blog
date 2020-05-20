@@ -77,11 +77,11 @@
                         <i class="el-icon-arrow-down el-icon--right"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="edit" icon="el-icon-edit">个人资料</el-dropdown-item>
-                        <el-dropdown-item command="logout" icon="el-icon-switch-button">注销</el-dropdown-item>
+                        <el-dropdown-item command="edit" icon="el-icon-edit">&nbsp;个人资料</el-dropdown-item>
                         <el-dropdown-item v-if="$store.state.state === '2'" command="manage" icon="el-icon-s-tools">
                             后台管理
                         </el-dropdown-item>
+                        <el-dropdown-item command="logout" icon="el-icon-switch-button">&nbsp;注销</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
             </div>
@@ -102,6 +102,7 @@
                 >
                     <el-input
                         type="text"
+                        name="username"
                         placeholder="请输入用户名"
                         v-model="form.username"
                         autocomplete="off"
@@ -131,6 +132,7 @@
                 >
                     <el-input
                         type="password"
+                        name="password"
                         placeholder="请输入密码"
                         v-model="form.password"
                         autocomplete="off"
@@ -165,16 +167,11 @@
             </div>
         </el-dialog>
         <el-dialog v-if="$store.state.token !== null" title="个人资料" :visible.sync="editVisible" :width="ModuleSize">
+            <el-avatar :size="80" :src="require('@/assets/default_avatar.jpg')"></el-avatar>
+            <p>用户名: {{ $store.state.username }}</p>
             <p>
                 昵称: {{ $store.state.nickname }}
-                <el-button
-                    style="padding: 3px 0; float: right;"
-                    type="text"
-                    @click="
-                        innerTitle = '修改昵称'
-                        innerVisible = true
-                    "
-                >
+                <el-button style="padding: 3px 0; float: right;" type="text" @click="$refs.changeNickname.dialogShow()">
                     修改昵称
                 </el-button>
             </p>
@@ -184,14 +181,21 @@
                     style="padding: 3px 0; float: right;"
                     type="text"
                     @click="
-                        innerTitle = $store.state.email === '' ? '邮箱绑定' : '邮箱解除'
-                        innerVisible = true
+                        innerTitle = $store.state.email === '' ? '绑定邮箱' : '更换邮箱'
+                        if ($store.state.email === '') $refs.bindEmail.dialogShow()
+                        else $refs.changeEmail.dialogShow()
                     "
                 >
-                    {{ $store.state.email === '' ? '绑定邮箱' : '解除绑定' }}
+                    {{ $store.state.email === '' ? '绑定邮箱' : '更换邮箱' }}
                 </el-button>
             </p>
-            <el-dialog :width="ModuleSize" :title="innerTitle" :visible.sync="innerVisible"></el-dialog>
+            <el-button style="padding: 3px 0; float: left;" type="text" @click="innerTitle = '修改密码'">
+                修改密码
+            </el-button>
+            <ChangeNickname ref="changeNickname" />
+            <ChangeEmail ref="changeEmail" v-if="$store.state.email !== ''" />
+            <ChangePassword ref="changePassword" v-show="innerTitle === '修改密码'" />
+            <BindEmail ref="bindEmail" v-if="$store.state.email === ''" />
             <div slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
             </div>
@@ -200,12 +204,18 @@
 </template>
 
 <script>
+import ChangeNickname from '../manage/ChangeNickname'
+import ChangeEmail from '../manage/ChangeEmail'
+import ChangePassword from '../manage/ChangePassword'
+import BindEmail from '../manage/BindEmail'
+
 export default {
     name: 'BlogNaviBar',
+    components: { ChangeNickname, ChangeEmail, ChangePassword, BindEmail },
     data() {
         return {
             Visible: false,
-            ModuleSize: document.documentElement.clientWidth > 750 ? '450px' : '350px',
+            ModuleSize: document.documentElement.clientWidth > 750 ? '600px' : '450px',
             title: '',
             innerTitle: '',
             form: {
@@ -215,8 +225,6 @@ export default {
                 password_repeat: ''
             },
             editVisible: false,
-            innerVisible: false,
-            labelWidth: '120',
             widthListen: document.documentElement.clientWidth > 809,
             naviShow: document.documentElement.clientWidth > 809
         }
@@ -255,7 +263,6 @@ export default {
                     }).then(() => {
                         this.form.username = responseResult.data.username
                         this.form.password = responseResult.data.password
-                        this.submit()
                     })
                 })
                 .catch((failRespone) => {
@@ -334,7 +341,7 @@ export default {
             }
         },
         listenWidth() {
-            this.ModuleSize = document.documentElement.clientWidth > 750 ? '450px' : '350px'
+            this.ModuleSize = document.documentElement.clientWidth > 750 ? '600px' : '450px'
             if (document.documentElement.clientWidth > 809) this.naviShow = true
             else if (this.widthListen === true) this.naviShow = false
             this.widthListen = document.documentElement.clientWidth > 809
@@ -342,6 +349,9 @@ export default {
     },
     created: function() {
         window.addEventListener('resize', this.listenWidth)
+    },
+    beforeDestroy: function() {
+        window.removeEventListener('resize', this.listenWidth)
     }
 }
 </script>

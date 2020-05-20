@@ -33,10 +33,6 @@ axios.interceptors.response.use(
                 case 401:
                     // 返回 401 清除token信息并跳转到登录页面
                     store.commit('Logout')
-                    router.replace({
-                        path: 'login',
-                        query: { redirect: router.currentRoute.fullPath }
-                    })
             }
         }
         return Promise.reject(error.response.data) // 返回接口返回的错误信息
