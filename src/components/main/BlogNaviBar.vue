@@ -96,7 +96,6 @@
             <el-form :model="form" ref="user_info">
                 <el-form-item
                     label="用户名"
-                    :label-width="labelWidth"
                     :rules="[{ required: true, message: '用户名不能为空' }]"
                     prop="username"
                 >
@@ -112,7 +111,6 @@
                 <el-form-item
                     v-show="title === '注册'"
                     label="昵称"
-                    :label-width="labelWidth"
                     :rules="[{ required: true, message: '昵称不能为空' }]"
                     prop="nickname"
                 >
@@ -126,7 +124,6 @@
                 </el-form-item>
                 <el-form-item
                     label="密码"
-                    :label-width="labelWidth"
                     :rules="[{ required: true, message: '密码不能为空' }]"
                     prop="password"
                 >
@@ -142,7 +139,6 @@
                 <el-form-item
                     v-show="title === '注册'"
                     label="确认密码"
-                    :label-width="labelWidth"
                     :rules="[
                         { required: true, message: '请再次确认密码' },
                         { validator: validatePass_repeat_password, trigger: 'blur' }
@@ -181,7 +177,6 @@
                     style="padding: 3px 0; float: right;"
                     type="text"
                     @click="
-                        innerTitle = $store.state.email === '' ? '绑定邮箱' : '更换邮箱'
                         if ($store.state.email === '') $refs.bindEmail.dialogShow()
                         else $refs.changeEmail.dialogShow()
                     "
@@ -189,12 +184,12 @@
                     {{ $store.state.email === '' ? '绑定邮箱' : '更换邮箱' }}
                 </el-button>
             </p>
-            <el-button style="padding: 3px 0; float: left;" type="text" @click="innerTitle = '修改密码'">
+            <el-button style="padding: 3px 0; float: left;" type="text" @click="$refs.changePassword.dialogShow()">
                 修改密码
             </el-button>
             <ChangeNickname ref="changeNickname" />
             <ChangeEmail ref="changeEmail" v-if="$store.state.email !== ''" />
-            <ChangePassword ref="changePassword" v-show="innerTitle === '修改密码'" />
+            <ChangePassword ref="changePassword" />
             <BindEmail ref="bindEmail" v-if="$store.state.email === ''" />
             <div slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
@@ -217,7 +212,6 @@ export default {
             Visible: false,
             ModuleSize: document.documentElement.clientWidth > 750 ? '600px' : '450px',
             title: '',
-            innerTitle: '',
             form: {
                 username: '',
                 nickname: '',
@@ -345,6 +339,20 @@ export default {
             if (document.documentElement.clientWidth > 809) this.naviShow = true
             else if (this.widthListen === true) this.naviShow = false
             this.widthListen = document.documentElement.clientWidth > 809
+        }
+    },
+    computed: {
+        isLogin: {
+            get: function() {
+                return this.$store.state.rnd
+            },
+            set: function() {}
+        }
+    },
+    watch: {
+        isLogin(newVal, oldVal) {
+            if (newVal === null && oldVal !== null && this.editVisible === true)
+                this.editVisible = false
         }
     },
     created: function() {

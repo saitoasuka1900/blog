@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :width="moduleSize" :visible.sync="Visible">
+    <el-dialog title="更换邮箱" :width="moduleSize" :visible.sync="Visible" :close-on-click-modal='false'>
         <br />
         <el-steps :active="active" finish-status="success">
             <el-step title="验证身份"></el-step>
@@ -63,6 +63,14 @@ export default {
     methods: {
         dialogShow() {
             this.Visible = true
+            this.active = 0
+            if (this.interval !== null) {
+                window.clearInterval(this.interval)
+                this.interval = null
+            }
+            this.time = 60
+            this.icodeButton = '点击发送邮箱验证码'
+            this.form.icode = ''
         },
         sendIcode() {
             this.$axios
@@ -127,13 +135,13 @@ export default {
                                 this.interval = null
                                 this.time = 60
                                 this.icodeButton = '点击发送邮箱验证码'
-                                this.form.icode = ''
-                                this.$message({
-                                    message: '身份验证成功',
-                                    type: 'success'
-                                })
-                                this.active += 1
                             }
+                            this.form.icode = ''
+                            this.$message({
+                                message: '身份验证成功',
+                                type: 'success'
+                            })
+                            this.active += 1
                         } else this.$message.error('验证失败')
                     })
                     .catch((failRespone) => {
@@ -166,13 +174,13 @@ export default {
                                 this.interval = null
                                 this.time = 60
                                 this.icodeButton = '点击发送邮箱验证码'
-                                this.$message({
-                                    message: '邮箱绑定成功',
-                                    type: 'success'
-                                })
-                                this.active += 1
                             }
-                            this.Visible = false
+                            this.form.icode = ''
+                            this.$message({
+                                message: '邮箱绑定成功',
+                                type: 'success'
+                            })
+                            this.active += 1
                         } else this.$message.error('邮箱绑定失败')
                     })
                     .catch((failRespone) => {

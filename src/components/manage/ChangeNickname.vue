@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :width="moduleSize" :visible.sync="Visible">
+    <el-dialog title="修改昵称" :width="moduleSize" :visible.sync="Visible" :close-on-click-modal='false'>
         <br />
         <el-form :model="form">
             <el-form-item
@@ -37,7 +37,7 @@ export default {
         },
         submit() {
             this.$axios
-                .post('/operator/submitNickname', {
+                .post('/operator/change/nickname', {
                     nickname: this.form.nickname,
                     rnd: this.$store.state.rnd
                 })

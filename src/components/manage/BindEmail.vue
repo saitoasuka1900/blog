@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :width="moduleSize" :visible.sync="Visible">
+    <el-dialog title="绑定邮箱" :width="moduleSize" :visible.sync="Visible" :close-on-click-modal='false'>
         <el-form :model="form">
             <el-form-item
                 label="邮箱"
@@ -110,11 +110,11 @@ export default {
                             this.interval = null
                             this.time = 60
                             this.icodeButton = '点击发送邮箱验证码'
-                            this.$message({
-                                message: '邮箱绑定成功',
-                                type: 'success'
-                            })
                         }
+                        this.$message({
+                            message: '邮箱绑定成功',
+                            type: 'success'
+                        })
                         this.Visible = false
                     } else this.$message.error('邮箱绑定失败')
                 })
