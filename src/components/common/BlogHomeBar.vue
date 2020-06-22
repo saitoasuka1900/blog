@@ -1,7 +1,7 @@
 <template>
     <div id="home-page" class="flex-set">
         <transition name="main-view" mode="out-in">
-            <router-view />
+            <router-view @change-info-bar="$emit('change-info-bar', arguments[0])"/>
         </transition>
         <div style="clear: both;" />
     </div>
@@ -14,16 +14,6 @@ export default {
     data() {
         return {
             curPath: "",
-        }
-    },
-    mounted: function() {
-        this.curPath = this.$route.path.split('/')
-        this.$emit('change-info-bar', !(this.curPath.length > 2 && this.curPath[2] === 'post'))
-    },
-    watch: {
-        $route(to) {
-            this.curPath = to.path.split('/')
-            this.$emit('change-info-bar', !(this.curPath.length > 2 && this.curPath[2] === 'post'))
         }
     }
 }

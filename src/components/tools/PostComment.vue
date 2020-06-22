@@ -10,12 +10,10 @@
                 <p class="content" style="font-size: 1.1rem;">{{elem.content}}</p>
             </div>
         </div>
-        <pager page-type="comment" :page-size="15" @page-turn="pageTurn(arguments)"/>
     </div>
 </template>
 
 <script>
-import pager from "./Pager"
 
 function Comment(comment) {
     this.nickname = comment.nickname
@@ -26,7 +24,6 @@ function Comment(comment) {
 
 export default {
     name: 'PostComment',
-    components: { pager },
     data() {
         return {
             postId: 0,

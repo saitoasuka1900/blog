@@ -1,6 +1,6 @@
 <template>
     <el-dialog title="绑定邮箱" :width="moduleSize" :visible.sync="Visible" :close-on-click-modal='false'>
-        <el-form :model="form">
+        <el-form :model="form" ref="form">
             <el-form-item
                 label="邮箱"
                 :rules="[
@@ -85,6 +85,12 @@ export default {
                 })
         },
         submit() {
+            let flag = false
+            this.$refs.form.validate((valid) => {
+                flag = valid
+            })
+            if (flag === false)
+                return
             this.$axios
                 .post('/operator/bind/email', {
                     email: this.form.email,

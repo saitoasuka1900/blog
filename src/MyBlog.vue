@@ -27,8 +27,7 @@ export default {
         }
     },
     components: { BlogBg, BlogHeader, BlogNaviBar, BlogMain, BlogFooter, BlogFooterWave, MusicPlayer },
-    created: function() {
-    },
+    created: function() {},
     mounted: function() {
         if (this.$store.state.token !== null) {
             this.$axios

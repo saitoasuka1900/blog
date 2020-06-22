@@ -2,12 +2,14 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import MyBlog from './MyBlog'
-import './js/header'
+import header from './js/header'
 import './styles/index.less'
 import router from './router'
 import ElementUI from 'element-ui'
 import store from './store'
 
+
+header()
 // 引用axios，并设置基础URL为后端服务api地址
 const axios = require('axios')
 // 添加request拦截器，在请求头中加token
@@ -40,7 +42,7 @@ axios.interceptors.response.use(
 )
 
 axios.defaults.baseURL =
-    process.env.NODE_ENV === 'production' ? 'https://www.saitoasuka.xyz:8443/api' : 'http://localhost:8443/api'
+    process.env.NODE_ENV === 'production' ? 'https://www.saitoasuka.xyz/api' : 'http://localhost:8443/api'
 console.log(process.env.NODE_ENV)
 // 将API方法绑定到全局
 Vue.prototype.$axios = axios

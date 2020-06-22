@@ -43,11 +43,11 @@ module.exports = {
             .set('assets', resolve('src/assets'))
             .set('components', resolve('src/components'))
 
-        const svgRule = config.module.rule('svg')
+        //const svgRule = config.module.rule('svg')
 
         // 清除已有的所有 loader。
         // 如果你不这样做，接下来的 loader 会附加在该规则现有的 loader 之后。
-        svgRule.uses.clear()
+        //svgRule.uses.clear()
         config.module
             .rule('svg-sprite')
             .use('svgo-loader')
@@ -114,7 +114,7 @@ module.exports = {
     devServer: {
         proxy: {
             '/api': {
-                target: isProduction ? 'https://www.saitoasuka.xyz:8443' : 'http://localhost:8443', //设置调用的接口域名和端口
+                target: isProduction ? 'https://www.saitoasuka.xyz' : 'http://localhost:8443', //设置调用的接口域名和端口
                 changeOrigin: true, //是否跨域
                 ws: true,
                 pathRewrite: {
@@ -146,6 +146,15 @@ module.exports = {
              */
             pluginOptions: {
                 plainSprite: true
+            }
+        }
+    },
+
+    css: {
+        loaderOptions: {
+            sass: {
+                prependData: `@import "@/styles/index.scss";`
+                // 会在每个style为scss的文件下导入该文件
             }
         }
     }

@@ -145,6 +145,7 @@ export default {
         }
     },
     mounted: function() {
+        this.$emit('change-info-bar', true)
         this.getMessage()
     },
     watch: {

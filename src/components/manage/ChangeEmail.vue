@@ -6,7 +6,7 @@
             <el-step title="绑定邮箱"></el-step>
             <el-step title="绑定成功"></el-step>
         </el-steps>
-        <el-form :model="form">
+        <el-form :model="form" ref="form">
             <el-input v-show="active === 0" :placeholder="$store.state.email" disabled style="margin-top: 15px;">
                 <template slot="prepend">邮箱:&nbsp;</template>
             </el-input>
@@ -111,6 +111,12 @@ export default {
                 })
         },
         submit() {
+            let flag = false
+            this.$refs.form.validate((valid) => {
+                flag = valid
+            })
+            if (flag === false)
+                return
             if (this.active === 0) {
                 this.$axios
                     .post('/operator/verify/email', {

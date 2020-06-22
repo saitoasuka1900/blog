@@ -1,0 +1,10 @@
+@mixin opacity-set($_alpha: 0, $_color: #000000) {
+    background-color: rgba($color: $_color, $alpha: $_alpha);
+}
+@mixin transition-set($speed: .2s) {
+    -webkit-transition: all $speed;
+    -moz-transition: all $speed;
+    -ms-transition: all $speed;
+    -o-transition: all $speed;
+    transition: all $speed;
+}

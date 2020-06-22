@@ -2,72 +2,122 @@
     <span class="info-page">
         <div id="announce" class="info-box">
             <div class="title">公告栏</div>
-            <div class="line" />
-            <p>{{announcement}}</p>
-            <div class="line" />
+            <el-divider />
+            <p>{{ announcement }}</p>
+            <el-divider />
         </div>
-        <div id="comments" class="info-box">
-            <div class="title">最新评论</div>
-            <div class="line" />
-            <div v-for="elem in comments" :key="elem.id">
-                <Avatar style="display: inline-block; margin: 0;" :src="elem.avatar" :size="25"/>{{elem.nickname}}:
-                <p class="comment" @click="$router.push({path: elem.belongTo})">{{elem.content}}</p>
-                <div style="font-size: 0.9em;">{{elem.time}}</div>
-                <div class="line" />
+        <transition name="list">
+            <div id="comments" class="info-box">
+                <div class="title">最新留言</div>
+                <el-divider />
+                <transition-group name="message">
+                    <span v-for="elem in messages" :key="elem.time" class="transition-set">
+                        <Avatar style="display: inline-block; margin: 0;" :src="elem.avatar" :size="25" />
+                        {{ elem.nickname }}:
+                        <p class="comment">{{ elem.content }}</p>
+                        <div style="font-size: 0.9em;">{{ elem.time }}</div>
+                        <el-divider />
+                    </span>
+                </transition-group>
             </div>
-        </div>
+        </transition>
     </span>
 </template>
 
 <script>
-import Avatar from "vue-avatar"
+import Avatar from 'vue-avatar'
 
-function Comment(comment) {
-    this.nickname = comment.nickname
-    this.content = comment.content
-    this.time = comment.time
-    this.belongTo = comment.belongTo + '/comment/1'
-    this.avatar = require('@/assets/' + (comment.avatar === '' ? 'default_avatar.jpg' : comment.avatar))
+function Message(message) {
+    this.nickname = message.nickname
+    this.content = message.content
+    this.time = message.time
+    this.avatar =  message.avatar === '' ? require('@/assets/default_avatar.jpg') : message.avatar
 }
 
-
 export default {
-    name: "BlogInfoBar",
+    name: 'BlogInfoBar',
     components: { Avatar },
     data() {
         return {
-            cur: {avatar: '',nickname: "fijae", content:"粉啊佛尔啊佛i而iu合肥哦阿尔佛二分i哦哈尔偶分和奥i费奥弗额非我分无法而我发", time:"2012-09-23 12:23:12", belongTo: '/home/post/1'},
-            announcement: "",
-            comments: []
+            announcement: '',
+            messages: []
+        }
+    },
+    created() {
+        // 页面创建生命周期函数
+        this.initWebSocket()
+    },
+    destroyed: function() {
+        // 离开页面生命周期函数
+        this.websocketclose()
+    },
+    methods: {
+        initWebSocket: function() {
+            // WebSocket与普通的请求所用协议有所不同，ws等同于http，wss等同于https
+            this.websock = new WebSocket(process.env.VUE_APP_WEBSOCKET)
+            this.websock.onopen = this.websocketonopen
+            this.websock.onerror = this.websocketonerror
+            this.websock.onmessage = this.websocketonmessage
+            this.websock.onclose = this.websocketclose
+        },
+        websocketonopen: function() {
+            console.log('WebSocket连接成功')
+        },
+        websocketonerror: function(e) {
+            console.log('WebSocket连接发生错误' + e)
+        },
+        websocketonmessage: function(e) {
+            let data = JSON.parse(e.data)
+            if (this.messages.length >= 5)
+                this.messages.splice(this.messages.length - 1, 1)
+            this.messages.splice(0, 0, new Message(data))
+            console.log(data)
+        },
+        websocketclose: function(e) {
+            console.log('WebSocket连接断开' + e)
         }
     },
     mounted: function() {
-        this.comments.push(new Comment(this.cur))
-        this.comments[0].id = 1
-        this.comments.push(new Comment(this.cur))
-        this.comments[0].id = 2
-        this.comments.push(new Comment(this.cur))
-        this.comments[0].id = 3
-        this.comments.push(new Comment(this.cur))
-        this.comments[0].id = 4
-        this.comments.push(new Comment(this.cur))
-        this.comments[0].id = 5
         this.$axios
-            .post('/getAnnounce')
+            .post('/message/get', {
+                pageId: 1,
+                pageSize: 5
+            })
             .then((successRespone) => {
-                let res = successRespone.data
-                if (res.code === 200)
-                    this.announcement = res.data.announcement
-                else
-                    console.log('Get Annoncement failed')
+                let responseResult = successRespone.data
+                if (responseResult.code === 404)
+                    return
+                if (responseResult.code === 200) {
+                    for (let elem of responseResult.data.message_infos) {
+                        this.messages.push(new Message(elem))
+                    }
+                }
             })
             .catch((failRespone) => {
                 console.log(failRespone)
                 return failRespone
             })
-    },
+        this.$axios
+            .post('/getAnnounce')
+            .then((successRespone) => {
+                let res = successRespone.data
+                if (res.code === 200) this.announcement = res.data.announcement
+                else console.log('Get Annoncement failed')
+            })
+            .catch((failRespone) => {
+                console.log(failRespone)
+                return failRespone
+            })
+    }
 }
 </script>
+
+<style lang="scss" scoped>
+.transition-set {
+    display: block;
+    @include transition-set(.7s);
+}
+</style>
 
 <style scoped>
 .info-page {
@@ -90,29 +140,17 @@ export default {
     width: 100%;
     font-size: 1.1em;
     font-weight: bold;
-    padding-bottom: 1vh;
-}
-.line {
-    height: 2px;
-    border: none;
-    width: 100%;
-    border-top: 2px solid rgba(0, 0, 0, 0.178);
-    margin-bottom: 1%;
 }
 p {
     position: relative;
     margin: 0 !important;
-    padding: 0.5vh !important;
+    padding: 0 0.5vh !important;
     height: auto;
     word-break: break-word;
 }
-p[class=comment]:hover {
-    color: blue;
-}
 .comment {
     font-size: 1em;
-    cursor: pointer;
-    text-indent: 2em; 
+    text-indent: 2em;
     overflow: hidden;
     display: -webkit-box;
     text-overflow: ellipsis;
@@ -124,5 +162,15 @@ p[class=comment]:hover {
     .info-page {
         display: none;
     }
+}
+.list-move {
+    transition: transform 1s;
+}
+.message-leave-active {
+    position: absolute;
+}
+.message-enter, .message-leave-to {
+    opacity: 0;
+    transform: translateX(60px);
 }
 </style>

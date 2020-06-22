@@ -13,49 +13,28 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            component: () => import("components/page/BlogHome"),
-            alias: "/home" // 路由别名，访问 "/" url会保持 "/" 但是路由匹配为 "/home"
+            component: () => import("components/page/BlogHome")
         },
         {
-            path: "/home/:id(\\d+)",
+            path: "/(home|algorithm|development|other)/:id(\\d+)",
             name: "BlogHome",
             component: () => import("components/page/BlogHome")
         },
         {
-            path: "/home/post/:pid",
+            path: "/post/:pid(\\d+)",
             name: "BlogHomePost",
             component: () => import("components/page/MyPost"),
             children: [
                 {
-                    path: "comment/:id?",
-                    component: () => import("components/tools/PostComment")
+                    path: "comment/:id(\\d+)",
+                    component: () => import("components/page/MyPost")
                 }
             ]
-        },
-        {
-            path: "/diary/:id?",
-            name: "BlogDiary",
-            component: () => import("components/page/BlogDiary")
-        },
-        {
-            path: "/diary/post/:pid",
-            name: "BlogDiaryPost",
-            component: () => import("components/page/MyPost")
         },
         {
             path: "/message/:id(\\d+)",
             name: "BlogMessage",
             component: () => import("components/page/BlogMessage")
-        },
-        {
-            path: "/catagory",
-            name: "BlogCatagory",
-            component: () => import("components/page/BlogCatagory")
-        },
-        {
-            path: "/search/:searchType/:keyWord/:id?",
-            name: "BlogSearch",
-            component: () => import("components/page/BlogSearch")
         }
     ]
 })

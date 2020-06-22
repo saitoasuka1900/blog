@@ -6,7 +6,7 @@
             <el-step title="修改密码"></el-step>
             <el-step title="修改成功"></el-step>
         </el-steps>
-        <el-form :model="form">
+        <el-form :model="form" ref="form">
             <el-input v-show="active === 0" :placeholder="$store.state.email" disabled style="margin-top: 15px;">
                 <template slot="prepend">邮箱:&nbsp;</template>
             </el-input>
@@ -22,7 +22,10 @@
             <el-form-item
                     v-show="active === 1"
                     label="密码"
-                    :rules="[{ required: true, message: '密码不能为空' }]"
+                    :rules="[
+                        { required: true, message: '密码不能为空' },
+                        { validator: validatePass_password, trigger: 'blur' }
+                    ]"
                     prop="password"
                 >
                     <el-input
@@ -78,6 +81,18 @@ export default {
         }
     },
     methods: {
+        validatePass_password(rule, value, callback) {
+            let reg = new RegExp(/^[A-Za-z0-9]+$/)
+            if (value.length < 6) {
+                callback(new Error('密码过短'))
+            } else if (value.length > 24) {
+                callback(new Error('密码过长'))
+            } else if (reg.test(value) === false) {
+                callback(new Error('密码只允许有大小写半角字母或数字'))
+            } else {
+                callback()
+            }
+        },
         validatePass_repeat_password(rule, value, callback) {
             if (value !== this.form.password) {
                 callback(new Error('两次输入密码不一致!'))
@@ -137,6 +152,12 @@ export default {
                 })
         },
         submit() {
+            let flag = false
+            this.$refs.form.validate((valid) => {
+                flag = valid
+            })
+            if (flag === false)
+                return
             if (this.active === 0) {
                 this.$axios
                     .post('/operator/verify/email', {

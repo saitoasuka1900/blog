@@ -93,10 +93,13 @@
             :width="ModuleSize"
             :close-on-click-modal="false"
         >
-            <el-form :model="form" ref="user_info">
+            <el-form :model="form" ref="form">
                 <el-form-item
                     label="用户名"
-                    :rules="[{ required: true, message: '用户名不能为空' }]"
+                    :rules="[
+                        { required: true, message: '用户名不能为空' },
+                        { validator: validatePass_username, trigger: 'blur' }
+                    ]"
                     prop="username"
                 >
                     <el-input
@@ -105,13 +108,16 @@
                         placeholder="请输入用户名"
                         v-model="form.username"
                         autocomplete="off"
-                        @keyup.enter.native="submit()"
+                        @keyup.enter.native="submit"
                     ></el-input>
                 </el-form-item>
                 <el-form-item
-                    v-show="title === '注册'"
+                    v-if="title === '注册'"
                     label="昵称"
-                    :rules="[{ required: true, message: '昵称不能为空' }]"
+                    :rules="[
+                        { required: true, message: '昵称不能为空' },
+                        { validator: validatePass_nickname, trigger: 'blur' }
+                    ]"
                     prop="nickname"
                 >
                     <el-input
@@ -119,12 +125,15 @@
                         placeholder="请输入昵称"
                         v-model="form.nickname"
                         autocomplete="off"
-                        @keyup.enter.native="submit()"
+                        @keyup.enter.native="submit"
                     ></el-input>
                 </el-form-item>
                 <el-form-item
                     label="密码"
-                    :rules="[{ required: true, message: '密码不能为空' }]"
+                    :rules="[
+                        { required: true, message: '密码不能为空' },
+                        { validator: validatePass_password, trigger: 'blur' }
+                    ]"
                     prop="password"
                 >
                     <el-input
@@ -133,15 +142,15 @@
                         placeholder="请输入密码"
                         v-model="form.password"
                         autocomplete="off"
-                        @keyup.enter.native="submit()"
+                        @keyup.enter.native="submit"
                     ></el-input>
                 </el-form-item>
                 <el-form-item
-                    v-show="title === '注册'"
+                    v-if="title === '注册'"
                     label="确认密码"
                     :rules="[
                         { required: true, message: '请再次确认密码' },
-                        { validator: validatePass_repeat_password, trigger: 'blur' }
+                        { validator: validatePass_repeat_password, trigger: 'change' }
                     ]"
                     prop="password_repeat"
                 >
@@ -150,7 +159,7 @@
                         placeholder="请输入密码"
                         v-model="form.password_repeat"
                         autocomplete="off"
-                        @keyup.enter.native="submit()"
+                        @keyup.enter.native="submit"
                     ></el-input>
                 </el-form-item>
             </el-form>
@@ -159,7 +168,7 @@
                     游客登陆
                 </el-button>
                 <el-button @click="Visible = false">取 消</el-button>
-                <el-button type="primary" @click="submit()">{{ title }}</el-button>
+                <el-button type="primary" @click="submit">{{ title }}</el-button>
             </div>
         </el-dialog>
         <el-dialog v-if="$store.state.token !== null" title="个人资料" :visible.sync="editVisible" :width="ModuleSize">
@@ -251,7 +260,6 @@ export default {
                                 h('span', null, '密码: '),
                                 h('span', { style: 'color: teal' }, responseResult.data.password)
                             ]),
-                            h('p', null, '用户名和密码需要手动保存')
                         ]),
                         confirmButtonText: '确定'
                     }).then(() => {
@@ -263,6 +271,36 @@ export default {
                     this.$message.error('登录失败')
                     return failRespone
                 })
+        },
+        validatePass_username(rule, value, callback) {
+            let reg = new RegExp(/^[A-Za-z0-9]+$/)
+            if (value.length < 6 || value.length > 10) {
+                callback(new Error('用户名长度要在6位到10位之间'))
+            } else if (reg.test(value) === false) {
+                callback(new Error('用户名只允许有大小写半角字母或数字'))
+            } else {
+                callback()
+            }
+        },
+        validatePass_nickname(rule, value, callback) {
+            let reg = new RegExp(/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/)
+            if (reg.test(value) === false) {
+                callback(new Error('昵称只能是数字、字母和中文组成，不能包含特殊符号和空格'))
+            } else if (value.length > 15) {
+                callback(new Error('昵称长度需要小于15位'))
+            } else {
+                callback()
+            }
+        },
+        validatePass_password(rule, value, callback) {
+            let reg = new RegExp(/^[A-Za-z0-9]+$/)
+            if (value.length < 6 || value.length > 24) {
+                callback(new Error('密码长度要在6位到24位之间'))
+            } else if (reg.test(value) === false) {
+                callback(new Error('密码只允许有大小写半角字母或数字'))
+            } else {
+                callback()
+            }
         },
         validatePass_repeat_password(rule, value, callback) {
             if (value !== this.form.password) {
@@ -281,6 +319,12 @@ export default {
             }
         },
         submit() {
+            let flag = false
+            this.$refs.form.validate((valid) => {
+                flag = valid
+            })
+            if (flag === false)
+                return
             if (this.title === '登录') {
                 this.$axios
                     .post('/Login', {

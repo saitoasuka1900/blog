@@ -1,10 +1,13 @@
 <template>
     <el-dialog title="修改昵称" :width="moduleSize" :visible.sync="Visible" :close-on-click-modal='false'>
         <br />
-        <el-form :model="form">
+        <el-form :model="form" ref="form">
             <el-form-item
                 label="昵称"
-                :rules="[{ required: true, message: '昵称不能为空' }]"
+                :rules="[
+                    { required: true, message: '昵称不能为空' },
+                    { validator: validatePass_nickname, trigger: 'blur' }
+                ]"
                 prop="nickname"
             >
                 <el-input :placeholder="$store.state.nickname" v-model="form.nickname" autocomplete="off"></el-input>
@@ -35,7 +38,23 @@ export default {
             this.form.nickname = this.$store.state.nickname
             this.Visible = true
         },
+        validatePass_nickname(rule, value, callback) {
+            let reg = new RegExp(/^[\u4e00-\u9fa5_a-zA-Z0-9]+$/)
+            if (reg.test(value) === false) {
+                callback(new Error('昵称只能是数字、字母和中文组成，不能包含特殊符号和空格'))
+            } else if (value.length > 15) {
+                callback(new Error('昵称长度需要小于15'))
+            } else {
+                callback()
+            }
+        },
         submit() {
+            let flag = false
+            this.$refs.form.validate((valid) => {
+                flag = valid
+            })
+            if (flag === false)
+                return
             this.$axios
                 .post('/operator/change/nickname', {
                     nickname: this.form.nickname,
