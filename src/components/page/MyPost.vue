@@ -161,6 +161,14 @@ div[name='info'] {
         margin-left: 0;
     }
 }
+@media screen and (max-width: 700px) {
+    #post-box {
+        padding: 3px !important;
+    }
+    .md {
+        font-size: 1.5rem;
+    }
+}
 .category-enter-active,
 .category-leave-active {
     transition: all 0.2s;

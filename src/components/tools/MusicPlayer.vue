@@ -1,6 +1,6 @@
 <template>
     <aplayer fixed storageName="" :audio="audio" :lrcType="0"
-    :order="OverMode" :volume="0.3" :loop="LoopMode"/>
+    :order="OverMode" :volume="0.6" :loop="LoopMode"/>
 </template>
 
 <script>
@@ -17,23 +17,22 @@ export default {
             OverMode: "random",
             name: [
                 "雨だれの歌", "岁月成碑", "and I'm home", "HAPPY BIRTHDAY",
-                "繁华唱遍", "天使にふれたよ!", "シルシ", "Scarborough Fair",
-                "キネマ", "LAST STARDUST", "Take Me Hand", "勾指起誓",
-                "アスノヨゾラ哨戒班", "START·DASH", "コネクト", "ほころび",
-                "決別の旅", "ヤキモチ", "Lemon", "DREAM SOLISTER"
+                "天使にふれたよ!", "シルシ", "Scarborough Fair", "キネマ",
+                "LAST STARDUST", "Take Me Hand", "雲雀", "コネクト", "ヤキモチ",
+                "Lemon", "花鳥風月", "未来", "君の知らない物語", "Behind"
             ],
             artist: [
                 "水瀬いのり、久保ユリカ", "泠鸢yousa", "喜多村英梨、野中藍",
-                "藤川千愛、kobasolo", "泠鸢yousa", "放課後ティータイム", "LiSA",
-                "山田タマル", "唐沢美帆", "Aimer", "DAISHI DANCE、Cecile Corbel",
-                "泠鸢yousa、Hanser", "ShakingHigh", "μ's", "ClariS", "V.A.",
-                "瑶山百霊", "高橋優", "米津玄師", "唐沢美帆"
+                "藤川千愛、kobasolo", "放課後ティータイム", "LiSA", "山田タマル",
+                "唐沢美帆", "Aimer", "DAISHI DANCE、Cecile Corbel", "ASCA",
+                "ClariS", "高橋優", "米津玄師", "End of the World", "Kalafina",
+                "supercell", "矶部花凛、芳野由奈、Lynn"
             ],
             audio: [],
         }
     },
     mounted: function() {
-        let srcurl = "https://saitoasuka-1258793314.file.myqcloud.com/blog/music",
+        let srcurl = process.env.VUE_APP_CDN_SOURCE + 'music',
             curid = []
         for (let i = 0; i < this.name.length; ++i) {
             curid.push(i)

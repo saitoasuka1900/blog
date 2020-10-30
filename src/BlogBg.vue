@@ -45,7 +45,7 @@ export default {
         let promise_all = [],
             imgs = []
         this.ImgSet.forEach((element, key, array) => {
-            let src = 'https://saitoasuka-1258793314.file.myqcloud.com/blog/' + element
+            let src = process.env.VUE_APP_CDN_SOURCE + element
             array[key] = 'url(\'' + src + '\')'
             imgs.push(new Image)
             this.Id.push(key)

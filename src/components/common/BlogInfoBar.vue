@@ -124,7 +124,7 @@ export default {
     position: absolute;
     margin-top: 3.5vh !important;
     width: 280px;
-    margin-left: 32vw;
+    right: 9vw;
     margin-bottom: 0.5vh;
 }
 .info-box {

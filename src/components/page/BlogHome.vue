@@ -49,7 +49,7 @@ export default {
     data() {
         return {
             bgid: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-            url: "url('https://saitoasuka-1258793314.file.myqcloud.com/blog/image/passageBg/image",
+            url: "url('" + process.env.VUE_APP_CDN_SOURCE + "image/passageBg/image",
             post_list: [],
             pageId: this.$route.path === '/' ? 1 : Number(this.$route.params.id),
             pageSize: 5,
